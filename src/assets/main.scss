@@ -3,3 +3,19 @@
 body {
   background-color: #d9d9d9;
 }
+
+#fancy-rock {
+  position: absolute;
+  z-index: -1;
+  opacity: 65%;
+}
+
+#info .row .col:first-child {
+  text-align: right;
+}
+
+.upgrade-price {
+  padding-top: 0.5rem;
+  font-size: 20px;
+  font-style: italic;
+}
