@@ -18,8 +18,9 @@
         </div>
       </div>
     </div>
-    <div id="nav">
+    <div id="nav" class="mb-3">
       <button class="btn btn-outline-secondary" @click="interface.page = 'workers'">Workers</button>
+      <button class="btn btn-outline-secondary" @click="interface.page = 'upgrades'">Upgrades</button>
     </div>
 
     <template v-if="interface.page === 'workers'">
@@ -33,14 +34,21 @@
       <template v-for="worker in workers">
         <div>
           <img class="worker-img" :src="'../src/assets/img/worker_' + worker.name + '.png'" alt="">
-          <button @click="upgrade(worker.name)" class="btn btn-outline-dark mx-3">{{ workers_library[worker.name]}}</button>
+          <button @click="add_worker(worker.name)" class="btn btn-outline-dark mx-3">{{ workers_library[worker.name]}}</button>
           <span>{{ Math.floor(worker.calculate_price()) }}</span>
         </div>
       </template>
 
     </template>
     <template v-if="interface.page === 'upgrades'">
-
+      <div class="row">
+        <template v-for="upgrade in upgrades">
+          <div class="col" v-if="upgrade.status === 'unlocked'">
+            <button @click="buy_upgrade(upgrade)" class="btn btn-outline-dark">{{ upgrade.desc }}</button>
+            <div class="upgrade-price">{{ upgrade.cost}}</div>
+          </div>
+        </template>
+      </div>
     </template>
     <template v-if="interface.page === 'achievements'">
 
@@ -77,6 +85,28 @@ export default {
         retriever: 'Retriever',
         orca: 'Orca'
       },
+
+      upgrades: [
+        {
+          worker: 'manual',
+          type: 'additive',
+          value: 2,
+          name: '',
+          desc: 'Each manual mines 2 ores more',
+          cost: 50,
+          status: 'unlocked'
+        },
+        {
+          worker: 'manual',
+          type: 'multiplicative',
+          value: 10,
+          name: '',
+          desc: 'Make manual mining x10 effective',
+          cost: 200,
+          status: 'unlocked'
+        }
+      ],
+
       money: 0,
       ore: 0,
 
@@ -119,7 +149,26 @@ export default {
       this.workers.push(new Worker('orca', 40000, 100000, 2.5));
     },
 
-    upgrade(worker_name, quantity = 1) {
+    get_worker(worker_name) {
+      return this.workers.find(worker => worker.name === worker.name);
+    },
+
+    buy_upgrade(upgrade) {
+      let worker = this.get_worker(upgrade.worker);
+
+      if (this.ore < upgrade.cost) return;
+
+      if (upgrade.type === 'additive') {
+        worker.add_additive_upgrade(upgrade.value);
+      } else {
+        worker.add_multiplicative_upgrade(upgrade.value);
+      }
+
+      this.ore -= upgrade.cost;
+      upgrade.status = 'bought';
+    },
+
+    add_worker(worker_name, quantity = 1) {
       let worker = this.workers.find(worker => {
         return worker.name === worker_name
       })
