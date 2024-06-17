@@ -26,17 +26,19 @@ export class Worker {
     }
 
     gather() {
-      let result = this.base_gather * this.quantity
+      let result = this.base_gather
 
       result = this.upgrade_additive.reduce( (accumulator, add) => {
         return accumulator + add
       }, result)
 
+      result *= this.quantity
+
       result = this.upgrade_multiplicative.reduce( (accumulator, mult) => {
         return accumulator * mult
-      }, result);
+      }, result)
 
-      return result; 
+      return result
     }
 
     /**
