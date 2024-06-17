@@ -42,32 +42,16 @@
 </template>
 
 <script>
+
+import { Worker } from "./engine/Worker.vue"
+
 export default {
   data() {
     return {
+      manual_worker: new Worker(),
+      workers: [],
       money: 0,
-
       ore: 0,
-
-      ore_gather_base: {
-        level: 1,
-        base_value: 1,
-        increment_value: 1,
-        base_price: 10,
-        increment_price: 2
-      },
-
-      adds_base: [
-        2
-      ],
-
-      mults: [
-          2
-      ],
-
-      adds_general: [
-        2
-      ],
 
       misc: {
         fancy_rock: {
@@ -87,39 +71,17 @@ export default {
 
   methods: {
     ore_gather() {
-      let result = this.value(this.ore_gather_base);
-
-      result = this.adds_base.reduce( (gather, add) => {
-        return gather + add
-      }, result);
-
-      result = this.mults.reduce( (gather, mult) => {
-        return gather * mult
-      }, result);
-
-      result = this.adds_general.reduce( (gather, add) => {
-        return gather + add
-      }, result);
-
-      this.ore += result;
+      this.ore += this.manual_worker.tick();
     },
 
     upgrade(param) {
-      let price = this.price(param);
+      let price = this.manual_worker.check_price()
 
       if( this.ore >= price) {
         this.ore -= price;
 
-        param.level++;
+        this.manual_worker.add_quantity(1)
       }
-    },
-
-    value(param) {
-      return param.base_value + (param.level - 1) * param.increment_value;
-    },
-
-    price(param) {
-      return param.base_price + (param.level - 1) * param.increment_price;
     },
 
     fancy_rock_move() {
