@@ -73,7 +73,9 @@ export default {
       workers: [],
       workers_library: {
         manual: 'Hand',
-        venture: 'Venturae'
+        venture: 'Venturae',
+        retriever: 'Retriever',
+        orca: 'Orca'
       },
       money: 0,
       ore: 0,
@@ -113,6 +115,8 @@ export default {
     workers_init() {
       this.workers.push(new Worker('manual', 1, 10, 1.2, 1));
       this.workers.push(new Worker('venture', 100, 100, 1.2));
+      this.workers.push(new Worker('retriever', 5000, 7500, 1.7));
+      this.workers.push(new Worker('orca', 40000, 100000, 2.5));
     },
 
     upgrade(worker_name, quantity = 1) {
