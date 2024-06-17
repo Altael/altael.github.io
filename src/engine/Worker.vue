@@ -4,6 +4,7 @@ export class Worker {
 
     /**
      * 
+     * @param name workers unique name
      * @param base_gather gathered currency per tick
      * @param quantity number of workers
      * @param upgrade_additive additive upgrades (e.g. +100 and +200 upgrades will be [100, 200])
@@ -11,7 +12,9 @@ export class Worker {
      * @param base_price price of a new worker
      * @param price_multiplier 1 if new worker costs same. >1 if each subsequent worker is more expensive
      */
-    constructor(base_gather, base_price, price_multiplier, quantity = 0, upgrade_additive = [], upgrade_multiplicative = []) {
+    constructor(name, base_gather, base_price, price_multiplier, quantity = 0, upgrade_additive = [], upgrade_multiplicative = []) {
+        this.name = name
+
         this.base_gather = base_gather
         this.base_price = base_price
         this.price_multiplier = price_multiplier
@@ -22,7 +25,7 @@ export class Worker {
         this.upgrade_multiplicative = upgrade_multiplicative
     }
 
-    tick() {
+    gather() {
       let result = this.base_gather * this.quantity
 
       result = this.upgrade_additive.reduce( (accumulator, add) => {
@@ -55,7 +58,7 @@ export class Worker {
      * calculates price of an additional worker
      */
      calculate_price() {
-        return base_price * Math.pow(price_multiplier, quantity - 1)
+        return this.base_price * Math.pow(this.price_multiplier, this.quantity)
     }
 }
 
