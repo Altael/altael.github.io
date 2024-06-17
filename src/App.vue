@@ -1,12 +1,12 @@
 <template>
   <div class="container py-5">
-    <div id="info" class="mb-3 mx-auto w-50">
+    <div v-if="workers.length" id="info" class="row mb-3 mx-auto w-50">
       <div class="row">
         <div class="col">
           "Money":
         </div>
         <div class="col">
-          {{ ore }}
+          {{ Math.floor(ore) }}
         </div>
       </div>
       <div class="row">
@@ -14,25 +14,43 @@
           Power of "mining":
         </div>
         <div class="col">
-          {{ value(ore_gather_base) }}
+          {{ manual_worker.gather() }}
         </div>
       </div>
     </div>
-    <div id="controls" class="row">
-      <div class="row mb-3">
-        <button type="button" class="btn btn-dark btn-lg w-100" @click="ore_gather()">
-          Mine ore... not yours. Get it?
-        </button>
-      </div>
-      <div class="row">
-        <div class="col d-flex flex-column align-items-center">
-          <button type="button" class="btn btn-dark btn-lg w-100" @click="upgrade(ore_gather_base)">
-            Upgrade your power (not actual power, just the number on top)
+    <div id="nav">
+      <button class="btn btn-outline-secondary" @click="interface.page = 'workers'">Workers</button>
+    </div>
+
+    <template v-if="interface.page === 'workers'">
+      <div id="controls" class="row">
+        <div class="row mb-3">
+          <button type="button" class="btn btn-dark btn-lg w-100" @click="ore += manual_worker.gather()">
+            Mine ore... not yours. Get it?
           </button>
-          <div class="upgrade-price">{{ price(ore_gather_base) }} "money"</div>
         </div>
       </div>
-    </div>
+      <template v-for="worker in workers">
+        <div>
+          <img class="worker-img" :src="'../src/assets/img/worker_' + worker.name + '.png'" alt="">
+          <button @click="upgrade(worker.name)" class="btn btn-outline-dark mx-3">{{ workers_library[worker.name]}}</button>
+          <span>{{ Math.floor(worker.calculate_price()) }}</span>
+        </div>
+      </template>
+
+    </template>
+    <template v-if="interface.page === 'upgrades'">
+
+    </template>
+    <template v-if="interface.page === 'achievements'">
+
+    </template>
+    <template v-if="interface.page === 'statistics'">
+
+    </template>
+    <template v-if="interface.page === 'settings'">
+
+    </template>
 
     <img @click="misc.fancy_rock.clicks++" src="../src/assets/img/veldspar.png" ref="fancy_rock" id="fancy-rock" :style="{
       top: misc.fancy_rock.top + 'px',
@@ -48,8 +66,15 @@ import { Worker } from "./engine/Worker.vue"
 export default {
   data() {
     return {
-      manual_worker: new Worker(),
+      interface: {
+        page: 'workers'
+      },
+
       workers: [],
+      workers_library: {
+        manual: 'Hand',
+        venture: 'Venturae'
+      },
       money: 0,
       ore: 0,
 
@@ -61,26 +86,46 @@ export default {
           vector_y: 1,
           clicks: 0
         }
-      }
+      },
+
+      tick_interval: 1000
     }
   },
 
   mounted() {
+    this.workers_init();
+    this.game_tick();
+
     this.fancy_rock_move();
   },
 
   methods: {
-    ore_gather() {
-      this.ore += this.manual_worker.tick();
+    game_tick() {
+      this.workers.forEach(worker => {
+        if (worker.name !== 'manual') {
+          this.ore += worker.gather()
+        }
+      });
+
+      setTimeout(() => {this.game_tick()}, this.tick_interval);
     },
 
-    upgrade(param) {
-      let price = this.manual_worker.check_price()
+    workers_init() {
+      this.workers.push(new Worker('manual', 1, 10, 1.2, 1));
+      this.workers.push(new Worker('venture', 100, 100, 1.2));
+    },
+
+    upgrade(worker_name, quantity = 1) {
+      let worker = this.workers.find(worker => {
+        return worker.name === worker_name
+      })
+
+      let price = worker.calculate_price()
 
       if( this.ore >= price) {
         this.ore -= price;
 
-        this.manual_worker.add_quantity(1)
+        worker.add_quantity(quantity)
       }
     },
 
@@ -105,7 +150,11 @@ export default {
   },
 
   computed: {
-
+    manual_worker() {
+      return this.workers.find(worker => {
+        return worker.name === 'manual'
+      });
+    }
   }
 }
 
